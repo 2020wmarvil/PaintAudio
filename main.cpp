@@ -1,29 +1,30 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
-
-//Using SDL and standard IO
 #include <SDL.h>
-#include <stdio.h>
+#include <SDL_image.h>
 
-//Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-int main( int argc, char* args[] ) {
+int main(int argc, char* args[]) {
 	// initialize SDL
 	SDL_Init(SDL_INIT_VIDEO);
+	IMG_Init(IMG_INIT_PNG);
 
-	// create pointers
+	// create window and screen
 	SDL_Window *window = SDL_CreateWindow("PaintAudio", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+	SDL_Surface* screen = SDL_GetWindowSurface(window);
+
+	// load optimized image
+	SDL_Surface* loadedSurface = IMG_Load("../loaded.png");
+	SDL_Surface* image = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0 );
+	SDL_FreeSurface(loadedSurface);
 
 	bool quit = false;
 	SDL_Event e;
 	while (!quit) {
 		// handle event queue
-		while ( SDL_PollEvent( &e ) != 0 ) {
-		    if ( e.type == SDL_QUIT ) { quit = true; }
-		    else if ( e.type == SDL_KEYDOWN ) {
+		while (SDL_PollEvent(&e) != 0) {
+		    if (e.type == SDL_QUIT) { quit = true; }
+		    else if (e.type == SDL_KEYDOWN) {
 		        switch (e.key.keysym.sym) {
 		            case SDLK_ESCAPE:
 						quit = true;
@@ -33,12 +34,17 @@ int main( int argc, char* args[] ) {
 		}
 
 		// content
-		SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
+		SDL_BlitSurface(image, NULL, screen, NULL);
 		SDL_UpdateWindowSurface(window);
 	}
 
+	SDL_FreeSurface(image);
+	SDL_FreeSurface(screen);
 	SDL_DestroyWindow(window);
+
+	IMG_Quit();
 	SDL_Quit();
 
 	return 0;
 }
+
