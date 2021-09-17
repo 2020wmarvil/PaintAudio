@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -81,6 +82,10 @@ int main(int argc, char* args[]) {
 	SDL_Surface* canvas = SDL_CreateRGBSurfaceWithFormat(NULL, SCREEN_WIDTH, SCREEN_HEIGHT, 8, SDL_PIXELFORMAT_BGRA32);
 	SDL_FillRect(canvas, NULL, COLOR_WHITE);
 	Render(window, screen, canvas);
+
+	TTF_Font *gFont = NULL;
+	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, "Bonk", { 0, 0 , 0 });
+	//SDL_Texture *texture = SDL_CreateTextureFromSurface( renderer, textSurface );
 
 	bool quit = false, mouse_down = false;
 
