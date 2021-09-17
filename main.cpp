@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <stdio.h>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -15,6 +16,8 @@ const int SCREEN_HEIGHT = 480;
 #define COLOR_BLUE  0xFF0000FF
 
 struct Point { int x, y; };
+
+int pencilSize = 1;
 
 void Render(SDL_Window *window, SDL_Surface *screen, SDL_Surface *img) {
 	SDL_Rect rect;
@@ -58,10 +61,14 @@ void Pencil(SDL_Surface *img, const Point& p1, const Point& p2) {
 	uint32_t* pixels = (uint32_t*)img->pixels;
 
 	for (int i = 0; i < points.size(); i++) {
-		int x = points[i].x;
-		int y = points[i].y;
+		for (int r = -pencilSize/2; r < std::ceil(pencilSize/2.0); r++) {
+			for (int c = -pencilSize/2; c < std::ceil(pencilSize/2.0); c++) {
+				int x = points[i].x + r;
+				int y = points[i].y + c;
 
-		pixels[(y*img->w)+x] = COLOR_BLACK;
+				pixels[(y*img->w)+x] = COLOR_BLACK;
+			}
+		}
 	}
 }
 
@@ -91,6 +98,10 @@ int main(int argc, char* args[]) {
 
 	Point formerMousePos;
 
+    int lctrl = 0, rctrl = 0;
+    int lshift = 0, rshift = 0;
+
+	SDL_StartTextInput();
 	SDL_Event e;
 	while (!quit) {
 		bool should_draw = false;
@@ -102,7 +113,41 @@ int main(int argc, char* args[]) {
 					case SDLK_ESCAPE:
 						quit = true;
 						break;
-					}
+					case SDLK_EQUALS:
+						if (lshift || rshift) std::cout << "LOG: Pencil Size: " << ++pencilSize << std::endl;
+						break;
+					case SDLK_MINUS:
+						if (--pencilSize < 1) pencilSize = 1;
+						else std::cout << "LOG: Pencil Size: " << pencilSize << std::endl;
+						break;
+					case SDLK_RCTRL:
+						rctrl = 1;
+						break;
+					case SDLK_LCTRL:
+						lctrl = 1;
+						break;
+					case SDLK_RSHIFT:
+						rshift = 1;
+						break;
+					case SDLK_LSHIFT:
+						lshift = 1;
+						break;
+				}
+			} else if (e.type == SDL_KEYUP) {
+				switch (e.key.keysym.sym) {
+					case SDLK_RCTRL:
+						rctrl = 0;
+						break;
+					case SDLK_LCTRL:
+						lctrl = 0;
+						break;
+					case SDLK_RSHIFT:
+						rshift = 0;
+						break;
+					case SDLK_LSHIFT:
+						lshift = 0;
+						break;
+				}
 			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					mouse_down = 1;
