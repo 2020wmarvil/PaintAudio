@@ -19,6 +19,82 @@ struct Point { int x, y; };
 
 int pencilSize = 1;
 
+static const char *arrow[] = {
+  /* width height num_colors chars_per_pixel */
+  "    32    32        3            1",
+  /* colors */
+  "X c #000000",
+  ". c #ffffff",
+  "  c None",
+  /* pixels */
+  "XXX                             ",
+  "X..XX                           ",
+  "X..X.XX                         ",
+  " XX....XX                       ",
+  " X.......XX                     ",
+  "  X........X                    ",
+  "  X.......X.X                   ",
+  "   X.....X...X                  ",
+  "   X....X.....X                 ",
+  "    X..X.X.....X                ",
+  "    X.X...X.....X               ",
+  "     X.....X.....X              ",
+  "      X.....X.....X             ",
+  "       X.....X.....X            ",
+  "        X.....X.....X           ",
+  "         X.....X.....X          ",
+  "          X.....X.....X         ",
+  "           X.....X.....X        ",
+  "            X.....X.....X       ",
+  "             X.....X.....X      ",
+  "              X.....X.....X     ",
+  "               X.....X...X.X    ",
+  "                X.....X.X...X   ",
+  "                 X.....X...X.X  ",
+  "                  X...X...X...X ",
+  "                   X.X...X.....X",
+  "                    X...X.....X ",
+  "                     X.X.....X  ",
+  "                      X.....X   ",
+  "                       X...X    ",
+  "                        X.X     ",
+  "                         X      ",
+  "0,0"
+};
+
+static SDL_Cursor *init_system_cursor(const char *image[]) {
+  int i, row, col;
+  Uint8 data[4*32];
+  Uint8 mask[4*32];
+  int hot_x, hot_y;
+
+  i = -1;
+  for (row=0; row<32; ++row) {
+    for (col=0; col<32; ++col) {
+      if (col % 8) {
+        data[i] <<= 1;
+        mask[i] <<= 1;
+      } else {
+        ++i;
+        data[i] = mask[i] = 0;
+      }
+      switch (image[4+row][col]) {
+        case 'X':
+          data[i] |= 0x01;
+          mask[i] |= 0x01;
+          break;
+        case '.':
+          mask[i] |= 0x01;
+          break;
+        case ' ':
+          break;
+      }
+    }
+  }
+  sscanf_s(image[4+row], "%d,%d", &hot_x, &hot_y);
+  return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
+}
+
 void Render(SDL_Window *window, SDL_Surface *screen, SDL_Surface *img) {
 	SDL_Rect rect;
 	SDL_FillRect(screen, NULL, COLOR_BLACK);
@@ -85,6 +161,9 @@ int main(int argc, char* args[]) {
 	//SDL_Surface* loadedSurface = IMG_Load("../loaded.png");
 	//SDL_Surface* image = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0 );
 	//SDL_FreeSurface(loadedSurface);
+
+	SDL_Cursor* cursor = init_system_cursor(arrow);
+	SDL_SetCursor(cursor);
 
 	SDL_Surface* canvas = SDL_CreateRGBSurfaceWithFormat(NULL, SCREEN_WIDTH, SCREEN_HEIGHT, 8, SDL_PIXELFORMAT_BGRA32);
 	SDL_FillRect(canvas, NULL, COLOR_WHITE);
